@@ -1,27 +1,85 @@
 import express from 'express';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
 import App from '../client/App.jsx';
-import Html from '../client/Html.jsx';
 
+import { renderToString } from 'react-dom/server'
+import { SheetsRegistry } from 'react-jss/lib/jss';
+import JssProvider from 'react-jss/lib/JssProvider';
+import {
+  MuiThemeProvider,
+  createMuiTheme,
+  createGenerateClassName,
+} from '@material-ui/core/styles';
+import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red'
+
+const app = express();
 const port = 3000;
-const server = express();
 
-server.get('/', (req, res) => {
-  /**
-   * renderToString() will take our React app and turn it into a string
-   * to be inserted into our Html template function.
-   */
-  const body = renderToString(<App />);
-  const title = 'Server side Rendering with Styled Components';
+// This is fired every time the server side receives a request.
+app.use(handleRender);
+app.listen(port);
 
-  res.send(
-    Html({
-      body,
-      title
-    })
-  );
-});
+// inject our initial component HTML and CSS into a template to be rendered on the client side.
+function renderFullPage(html, css) {
+  return `
+    <!doctype html>
+    <html>
+      <head>
+        <title>Material-UI</title>
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        <style id="jss-server-side">${css}</style>
+      </body>
+    </html>
+  `;
+}
 
-server.listen(port);
-console.log(`Serving at http://localhost:${port}`);
+// When rendering, we will wrap App, our root component, inside a JssProvider and MuiThemeProvider 
+// to make the sheetsRegistry and the theme available to all components in the component tree.
+// Render the initial HTML of our component before we send it to the client side. 
+// To do this, we use ReactDOMServer.renderToString().
+function handleRender(req, res) {
+  // Create a sheetsRegistry instance.
+  const sheetsRegistry = new SheetsRegistry();
+
+  // Create a theme instance.
+  const theme = createMuiTheme({
+    palette: {
+      primary: {
+        light: '#757575',
+        main: '#a4a4a4',
+        dark: '#494949',
+        contrastText: '#ffffff',
+      },
+      secondary: {
+        light: '#263238',
+        main: '#a4a4a4',
+        dark: '#494949',
+        contrastText: '#ffffff',
+      },
+      // accent: red,
+      // type: 'light',
+    },
+  });
+
+  const generateClassName = createGenerateClassName();
+
+  // Render the component to a string.
+  const html = renderToString(
+    <JssProvider registry={sheetsRegistry} generateClassName={generateClassName}>
+      <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
+        <App />
+      </MuiThemeProvider>
+    </JssProvider>
+  )
+
+  // Grab the CSS from our sheetsRegistry.
+  const css = sheetsRegistry.toString()
+
+  // Send the rendered page back to the client.
+  res.send(renderFullPage(html, css))
+}
+
+console.log(`Serving at https://localhost:${port}`);
