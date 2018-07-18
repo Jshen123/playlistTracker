@@ -1,7 +1,8 @@
 import React, {Component, Fragment} from 'react';
-import Sidebar from './Sidebar.jsx';
-import { Header, Footer } from './layouts';
-import Main from './main';
+import {BrowserRouter, Switch, Route } from 'react-router-dom'
+import { NavBar } from './layouts'
+import Main from './main'
+
 
 class App extends Component {
   constructor(props){
@@ -15,13 +16,9 @@ class App extends Component {
 
   render() {
     return (
-      <Fragment>
-        <Header />
-
-        <Main />
-        
-        <Footer />
-      </Fragment>
+        <NavBar>
+          <Main />
+        </NavBar>
     )
   }
 

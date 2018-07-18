@@ -1,23 +1,38 @@
-import express from 'express';
-import React from 'react';
-import App from '../client/App.jsx';
+
+"use strict";
+
+require('dotenv').config();
+
+import express from 'express'
+import React from 'react'
+import App from '../client/App.jsx'
 
 import { renderToString } from 'react-dom/server'
-import { SheetsRegistry } from 'react-jss/lib/jss';
-import JssProvider from 'react-jss/lib/JssProvider';
+import { SheetsRegistry } from 'react-jss/lib/jss'
+import JssProvider from 'react-jss/lib/JssProvider'
 import {
   MuiThemeProvider,
   createMuiTheme,
   createGenerateClassName,
 } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
+import green from '@material-ui/core/colors/green'
 import red from '@material-ui/core/colors/red'
 
+import knexConfig from './knexfile'
+import knex from 'knex'
+import knexLogger from 'knex-logger'
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // This is fired every time the server side receives a request.
 app.use(handleRender);
+
+// Log knex SQL queries to STDOUT as well
+app.use(knexLogger(knex));
+
+// Mount all resource routes
+app.use("/", Routes);
 app.listen(port);
 
 // inject our initial component HTML and CSS into a template to be rendered on the client side.
