@@ -1,7 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, Button, IconButton } from '@material-ui/core';
+import { AppBar, Toolbar, Button, IconButton } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
+import Grid from '@material-ui/core/Grid';
 
 const styles = {
   root: {
@@ -19,19 +20,20 @@ const styles = {
 function ButtonAppBar(props) {
   const { classes } = props;
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton className={classes.menuButton} color="inherit" aria-label="Menu">
-            <MenuIcon />
-          </IconButton>
-          <Button color="inherit">Create Playlist</Button>
-          <Typography variant="title" color="inherit" className={classes.flex}>
-            Title
-          </Typography>
-        </Toolbar>
-      </AppBar>
-    </div>
+    <Grid container className={classes.root}>
+      <Grid item xs={12}>
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton className={classes.menuButton} color="inherit" aria-label="Menu">
+              <MenuIcon />
+            </IconButton>
+            <Grid container alignItems='center' direction='row' justify='flex-end'>
+              <Button color="inherit">Login</Button>
+            </Grid>
+          </Toolbar>
+        </AppBar>
+      </Grid>
+    </Grid>
   );
 }
 
